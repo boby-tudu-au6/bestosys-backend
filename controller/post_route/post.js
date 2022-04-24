@@ -133,7 +133,7 @@ module.exports = {
         const validpass = await bcrypjs.compare(password, user.password)
         if (!validpass) return next(new AppError("invalid password", 403))
 
-        const token = jwt.sign({ _id: user._id }, privatekey, { expiresIn: '1h' })
+        const token = jwt.sign({ _id: user._id, name: user.name, type: 'user' }, privatekey, { expiresIn: '1h' })
         user.tokens = user.tokens.concat({ token })
         await user.save()
         return res.status(200).send({ message: "login sucess", token })
@@ -200,7 +200,7 @@ module.exports = {
         const validpass = await bcrypjs.compare(password, provider.password)
         if (!validpass) return next(new AppError("invalid password", 403))
 
-        const token = jwt.sign({ _id: provider._id }, privatekey, { expiresIn: '1h' })
+        const token = jwt.sign({ _id: provider._id, name:provider.name, type:'provider' }, privatekey, { expiresIn: '1h' })
         provider.tokens = provider.tokens.concat({ token })
         await provider.save()
         return res.status(200).send({ message: "login sucess", token })
