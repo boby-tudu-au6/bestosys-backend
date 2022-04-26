@@ -1,3 +1,4 @@
+require('dotenv').config()
 const { Users, Booking } = require('../../models/users')
 const Providers = require('../../models/providers')
 const Venues = require('../../models/venues')
@@ -9,6 +10,8 @@ const instance = require("../../razorpay")
 const { v4: uuid } = require("uuid");
 const createSignature = require("../../createSignature")
 const AppError = require('../../utils/apperror')
+const cloudinary = require('cloudinary').v2
+const bufferToString = require('../../bufferToString')
 
 const catchAsync = fn => {
     return (req, res, next) => {
@@ -200,7 +203,7 @@ module.exports = {
         const validpass = await bcrypjs.compare(password, provider.password)
         if (!validpass) return next(new AppError("invalid password", 403))
 
-        const token = jwt.sign({ _id: provider._id, name:provider.name, type:'provider' }, privatekey, { expiresIn: '1h' })
+        const token = jwt.sign({ _id: provider._id, name: provider.name, type: 'provider' }, privatekey, { expiresIn: '1h' })
         provider.tokens = provider.tokens.concat({ token })
         await provider.save()
         return res.status(200).send({ message: "login sucess", token })
@@ -215,9 +218,13 @@ module.exports = {
     venue: catchAsync(async (req, res, next) => {
         const body = { ...req.body }
         body.charges = "$" + body.charges
-        const venueimg = req.file.path
         const id = res.payload._id
         const a = await Providers.findById({ _id: id })
+        const { originalname, buffer } = req.file
+        let imageContent = bufferToString(originalname, buffer)
+        const { secure_url } = await cloudinary.uploader.upload(imageContent)
+        // const venueimg = req.file.path
+        const venueimg = secure_url
         if (a) {
             const venues = new Venues({ ...body, venueimg })
             venues.validate(function (err) {

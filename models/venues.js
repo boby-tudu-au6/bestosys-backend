@@ -7,7 +7,8 @@ const venuesSchema = new Schema({
         required:true,
     },
     category:{
-       type:String,maxlength:10,
+       type:String,
+    //    maxlength:10,
        required:true, 
     },
     charges:{
@@ -23,8 +24,9 @@ const venuesSchema = new Schema({
         ref:"providers",
     },
     review:{
-        type:String,maxlength:50,
-        required:true
+        type:String,
+        // maxlength:50,
+        // required:true
     },
     booking:[{
             type:Schema.Types.ObjectId,
