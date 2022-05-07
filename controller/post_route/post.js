@@ -137,8 +137,11 @@ module.exports = {
         if (!validpass) return next(new AppError("invalid password", 403))
 
         const token = jwt.sign({ _id: user._id, name: user.name, type: 'user' }, privatekey, { expiresIn: '1h' })
-        user.tokens = user.tokens.concat({ token })
-        await user.save()
+        // user.tokens = user.tokens.concat({ token })
+        // user.tokens = token
+        // console.log(user.tokens)
+        // await user.save()
+        await Users.updateOne({ _id: user._id }, { tokens: token })
         return res.status(200).send({ message: "login sucess", token })
     }),
 
@@ -322,26 +325,27 @@ module.exports = {
         else return next(new AppError("only for admin", 402))
     }),
     createOrder: async (req, res, next) => {
-        const auth = req.header('auth-token')
-        const something = jwt.verify(auth, privatekey)
         try {
+            const auth = req.header('auth-token')
+            const something = jwt.verify(auth, privatekey)
             const venue = await Venues.findOne({ _id: req.body.venueid })
             if (venue) {
                 const newOrder = new Booking({
                     userid: something,
                     productId: req.body.venueid,
-                    providerid: venue.provider
+                    providerid: venue.provider,
+                    date: req.body.date
                 })
                 await newOrder.save()
                 const user = await Users.findOne({ _id: something })
                 user.booking.push(newOrder._id)
                 await user.save()
-                return res.status(200).json({ message: "order created successfully", user: user })
+                return res.status(200).json({ message: "order created successfully" })
             } else {
                 res.status(400).json({ message: "invalid venueid" })
             }
         } catch (err) {
-            res.send(err)
+            res.status(400).send(err.message)
         }
 
     },

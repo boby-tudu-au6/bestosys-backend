@@ -20,47 +20,53 @@ const usersSchema = new Schema(
       required: true,
       trim: true
     },
-    status:{
-      type:String,
-      default:"inactive"
+    status: {
+      type: String,
+      default: "inactive"
     },
-    tokens: [{
-      token: {
-        type:
-        {
-          String,
-          required: true
-        }
-      }
-    }],
-    Isadmin:{type:Boolean,
-     default:false,
-      
+    tokens: String,
+    // tokens: [{
+    //   token: {
+    //     type:
+    //     {
+    //       String,
+    //       required: true
+    //     }
+    //   }
+    // }],
+    Isadmin: {
+      type: Boolean,
+      default: false,
+
     }
-    ,booking:[{
-            type:Schema.Types.ObjectId,
-            ref:"booking"
-      }],
+    , booking: [{
+      type: Schema.Types.ObjectId,
+      ref: "booking"
+    }],
   },
 
   { timestamps: true }
 );
 const bookingSchema = new Schema({
-  userid:{
-      type:String,
-      require:[true,"userid cannot be empty"]
+  userid: {
+    type: String,
+    require: [true, "userid cannot be empty"]
   },
-  productId:{
-      type:Schema.Types.ObjectId,ref:"venues",
-      required:[true,"productId cannot be empty"]
+  productId: {
+    type: Schema.Types.ObjectId, ref: "venues",
+    required: [true, "productId cannot be empty"]
   },
-  providerid:{
-    type:String,
-    required:[true,"provider id cannot be emty"]
+  providerid: {
+    type: String,
+    required: [true, "provider id cannot be emty"]
   },
-  status:{
-      type:String,
-      default:"incomplete"
+  date: {
+    type: Date,
+    required: true
+  },
+  status: {
+    type: String,
+    default: "incomplete"
   }
 })
 usersSchema.pre("save", function (next) { // A middleware use so that we can hash a password here only
@@ -82,4 +88,4 @@ usersSchema.pre("save", function (next) { // A middleware use so that we can has
 })
 const Booking = mongoose.model("booking", bookingSchema)
 const Users = mongoose.model("users", usersSchema)
-module.exports = {Users,Booking}
+module.exports = { Users, Booking }
