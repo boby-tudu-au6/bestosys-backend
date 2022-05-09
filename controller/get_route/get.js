@@ -14,9 +14,27 @@ module.exports = {
         const page = parseInt(req.query.page, 8) || 1;
         const limit = parseInt(req.query.limit, 8) || 8;
         const startIndex = (page - 1) * limit;
-        const response = await Venues.find()
+        let response = await Venues.find()
             .populate('provider', 'name')
-            .skip(startIndex).limit(limit);
+            .skip(startIndex)
+            .limit(limit);
+        response = await Promise.all(response.map(async (item) => {
+            try {
+                delete item.booking
+                let booking = await Booking.find({ productId: item._id }).select('date')
+                booking = booking.map(item => new Date(item.date).toDateString())
+                return { ...item, booking }
+            } catch (error) {
+                console.log(error.message)
+            }
+        }))
+        response = response.map(item => {
+            delete item['$__']
+            delete item["$locals"]
+            delete item["$op"]
+            delete item["$init"]
+            return item
+        })
         const total = await Venues.find().countDocuments()
         return res.status(200).json({
             total,
